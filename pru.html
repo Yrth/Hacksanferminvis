@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta charset="ISO-8859-1">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
+    <script src="http://d3js.org/d3.v3.min.js" type="text/javascript"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.js'></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.css' rel='stylesheet' />
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <style>
+    html,
+    body {
+        background-color: rgba(0,0,0,0);
+        color: '#fff';
+        height: 100%;
+        width: 100%;
+    }
+    body {
+        margin: 0;
+    }
+    #map {
+
+        height: 100%;
+    }
+    svg {
+        position: relative;
+    }
+    path {
+        fill: yellow;
+        stroke-width: 2px;
+        stroke: red;
+        stroke-opacity: 1;
+    }
+    .travelMarker {
+        fill: white;
+        opacity: 0.65;
+    }
+    .travelMarkerInjured {
+        fill: red;
+        opacity: 1;
+        z-index: 999999999999;
+    }
+    .travelMarker2{
+        r:5;
+        fill: blue;
+        opacity: 0.65;
+    }
+    .waypoints {
+        fill: black;
+        opacity: 0;
+    }
+}
+#marker2{
+    fill:blue;
+}
+.drinks {
+    stroke: black;
+    fill: grey;
+}
+.lineConnect {
+    fill: none;
+    stroke: black;
+    opacity: 1;
+}
+.locnames {
+    fill: black;
+    text-shadow: 1px 1px 1px #FFF, 3px 3px 5px #000;
+    font-weight: bold;
+    font-size: 13px;
+}
+.txt{
+
+}
+div.tooltip {   
+    box-shadow: 3px 3px 5px #888888;
+
+  opacity: 0;
+  width: 320px;
+  height: 140px;
+  position: absolute;           
+  text-align: center;                  
+  padding: 2px;             
+  font: 20px sans-serif;  
+  border-style: solid;
+    border-width: 1px;      
+  background-color: #dfeff5;
+    border-color: #9ebcce; 
+  border-radius: 8px;           
+  pointer-events: none;  
+  top:60%;
+  left:45%; 
+  z-index: 20000000;      
+}
+div.tooltip2 {   
+    box-shadow: 3px 3px 5px #888888;
+
+  opacity: 0;
+  width: 400px;
+  height: 140px;
+  position: absolute;           
+  text-align: center;                  
+  padding: 2px;             
+  font: 20px sans-serif;  
+  border-style: solid;
+    border-width: 1px;      
+  background-color: #dfeff5;
+    border-color: #9ebcce; 
+  border-radius: 8px;           
+  pointer-events: none;  
+  top:60%;
+  left:45%; 
+  z-index: 20000000;      
+}
+.leaflet-marker-icon .leaflet-zoom-animated .leaflet-clickable{
+    opacity: 0;
+}
+    .actived{
+        background-color: yellow;
+    }
+    .disactived{
+        opacity: 0.2;
+        }
+    .disactived_day{
+    opacity: 0.2;
+    left:4%;
+    width: 96%;
+    }
+    .lol{
+        color: '#F00';
+    }
+    .title{
+
+    }
+    .txt{
+        float: left;
+        display: block;
+    }
+    </style>
+</head>
+
+<body>
+
+    <div id="demo"></div>
+    <div class="tooltip">
+        <div class="title" style="background-color: #9ebcdf;border-style: solid; border-width: 1px;border-top-left-radius: 8px;border-top-right-radius: 4px; color:#fff;opacity:1">
+            <span class="glyphicon glyphicon-info-sign" style="float:left;"></span>
+            <div class="inner_title">
+              <span class="day">7 de </span> 
+              <span class="month">Julio de </span> 
+              <span class="year">2014</span>
+            </div>
+        </div>
+        <div class="runners_div"></div><br>
+        <div class="time_div"></div><br>
+        <div class="injures_div"></div><br>
+        <div style="float:left">Ganadería: <span class="familia"></span></div>
+    </div>
+    <div class="tooltip2">
+        <div class="injurietype_div"></div><br>
+        <div class="pronostico_div"></div><br>
+        <div class="zona_div"></div><br>
+    </div>
+    <div class="col-md-9" id="map"></div>
+    <div class="list-group col-md-3" >
+        <div id="encierro2014" >
+              <a href="#" class="list-group-item actived years" style="color:white;background-color:#BF0000;left:-4%;width:104%">
+                Encierros de 2014
+              </a>
+              <div id="en2014">
+                  <a href="#" day="0" class="list-group-item  actived_day days"> Lunes 7</a>
+                  <a href="#" day="1" class="list-group-item disactived_day days"> Martes 8</a>
+                  <a href="#" day="2" class="list-group-item disactived_day days "> Miércoles 9</a>
+                  <a href="#" day="3" class="list-group-item  disactived_day days"> Jueves 10</a>
+                  <a href="#" day="4" class="list-group-item  disactived_day days"> Viernes 11</a>
+                  <a href="#" day="5" class="list-group-item  disactived_day days"> Sábado 12</a>
+                  <a href="#" day="6" class="list-group-item disactived_day days "> Domingo 13</a>
+                  <a href="#" day="7" class="list-group-item disactived_day days "> Lunes 14</a>
+              </div>
+        </div>
+        <div id="encierro2013">
+              <a href="#" class="list-group-item years disactived" style="color:white;background-color:#BF0000">Encierros de 2013</a>
+              <div id="en2013" style="display:none">
+                  <a href="#" day="0" class="list-group-item  actived_day days"> Domingo 7</a>
+                  <a href="#" day="1" class="list-group-item disactived_day days "> Lunes 8</a>
+                  <a href="#" day="2" class="list-group-item disactived_day days "> Martes 9</a>
+                  <a href="#" day="3" class="list-group-item  disactived_day days"> Miércoles 10</a>
+                  <a href="#" day="4" class="list-group-item  disactived_day days"> Jueves 11</a>
+                  <a href="#" day="5" class="list-group-item  disactived_day days"> Viernes 12</a>
+                  <a href="#" day="6" class="list-group-item disactived_day days "> Sábado 13</a>
+                  <a href="#" day="7" class="list-group-item disactived_day days "> Domingo 14</a>
+              </div>
+        </div>
+        <div id="encierro2012">
+              <a href="#" class="list-group-item years disactived" style="color:white;background-color:#BF0000">Encierros de 2012</a>
+              <div id="en2012" style="display:none">
+                  <a href="#" day="0" class="list-group-item  actived_day days"> 7 sabado</a>
+                  <a href="#" day="1" class="list-group-item disactived_day days "> 8 domingo</a>
+                  <a href="#" day="2" class="list-group-item disactived_day days "> 9 lunes</a>
+                  <a href="#" day="3" class="list-group-item  disactived_day days"> 10 martes</a>
+                  <a href="#" day="4" class="list-group-item  disactived_day days"> 11 Miércoles</a>
+                  <a href="#" day="5" class="list-group-item  disactived_day days"> 12 jueves</a>
+                  <a href="#" day="6" class="list-group-item disactived_day days "> 13 viernes</a>
+                  <a href="#" day="7" class="list-group-item disactived_day days "> 14 sabado</a>
+              </div>
+        </div>
+        <div id="encierro2011">
+              <a href="#" class="list-group-item years disactived" style="color:white;background-color:#BF0000">Encierros de 2011</a>
+              <div id="en2011" style="display:none">
+                  <a href="#" day="0" class="list-group-item  actived_day days"> Jueves 7</a>
+                  <a href="#" day="1" class="list-group-item disactived_day days "> Viernes 8</a>
+                  <a href="#" day="2" class="list-group-item disactived_day days "> Sabado 9</a>
+                  <a href="#" day="3" class="list-group-item  disactived_day days"> Domingo 10</a>
+                  <a href="#" day="4" class="list-group-item  disactived_day days"> Lunes 11</a>
+                  <a href="#" day="5" class="list-group-item  disactived_day days"> Martes 12</a>
+                  <a href="#" day="6" class="list-group-item disactived_day days "> Miércoles 13</a>
+                  <a href="#" day="7" class="list-group-item disactived_day days "> Jueves 14</a>
+              </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    L.mapbox.accessToken = 'pk.eyJ1IjoieXJ0aGd6ZSIsImEiOiJjbDlJeUhJIn0.ywZk_CXAMzKjQ8-YiBH7rg';
+    var blocked = false;
+    
+    var set = false;
+    map = L.mapbox.map('map', 'mapbox.satellite')
+        .setView([42.817691, -1.643015], 17);
+    var mynewdata=[];
+    var heridas_totales = [];
+    var markers_on_map = [];
+
+    d3.csv("data.csv",function(data) {
+            data.forEach(function(d) {
+                d.year= +d.year, // convert "Year" column to Date
+                d.day= d.day,
+                d.runners= +d.runners,
+                d.duration= d.duration,
+                d.family= d.family
+                d.heridos = +d.heridos
+            });
+            mynewdata = data;
+        });
+
+    d3.csv("coordenadas.csv",function(data) {
+            heridas_totales = data;
+        });
+    setTimeout(function(){
+        var final_data = d3.nest()
+                .key(function(d) { return d.year; })
+                .entries(mynewdata);
+        final_heridas = d3.nest()
+                        .key(function(d) { return d.anio; })
+                        .entries(heridas_totales);
+        init_all(final_data[3],0,final_heridas[3].values);
+    
+        function init_all(data,day,heridas_data){
+            var animation_ended=false;
+            var heridosdeldia = [];
+            for (var i = 0; i < heridas_data.length; i++) {
+                if((heridas_data[i].n-1)==day){
+                    heridosdeldia.push(heridas_data[i]);
+                }
+            };
+            var counterheridostotal = 0;
+            // we will be appending the SVG to the Leaflet map pane
+            // g (group) element will be inside the svg 
+            var tiempo = data.values[day].duration.split(" ")[0].split(".");
+            tiempo = Number(tiempo[0])*60 + Number(tiempo[1]);
+            var runners = data.values[day].runners;
+            //runners = 2;
+            var heridos = data.values[day].heridos;
+            $('.day').html(data.values[day].day+" de ");
+            $('.year').html(data.values[day].year+" ");
+            $('.familia').html(data.values[day].family)
+            if(!set){
+                var svg = d3.select(map.getPanes().overlayPane).append("svg");
+            }
+            else{
+                var svg = d3.select("svg");
+            }
+            // if you don't include the leaflet-zoom-hide when a 
+            // user zooms in or out you will still see the phantom
+            // original SVG 
+            if(!set){
+                var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+            }
+            else{
+                //console.log(svg.select("g").selectAll('.travelMarker'));
+                svg.select("g").selectAll('circle').attr({'opacity':'0'});
+                svg.select("g").selectAll('circle').remove();
+                svg.select("g").remove();
+                var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+            }
+
+            //read in the GeoJSON. This function is asynchronous so
+            // anything that needs the json file should be within
+            d3.json("points.geojson", function(collection) {
+
+                // this is not needed right now, but for future we may need
+                // to implement some filtering. This uses the d3 filter function
+                // featuresdata is an array of point objects
+
+                var featuresdata = collection.features.filter(function(d) {
+                    return d.properties.id == "route1"
+                })
+
+                //stream transform. transforms geometry before passing it to
+                // listener. Can be used in conjunction with d3.geo.path
+                // to implement the transform. 
+
+                var transform = d3.geo.transform({
+                    point: projectPoint
+                });
+
+                //d3.geo.path translates GeoJSON to SVG path codes.
+                //essentially a path generator. In this case it's
+                // a path generator referencing our custom "projection"
+                // which is the Leaflet method latLngToLayerPoint inside
+                // our function called projectPoint
+                var d3path = d3.geo.path().projection(transform);
+
+
+                // Here we're creating a FUNCTION to generate a line
+                // from input points. Since input points will be in 
+                // Lat/Long they need to be converted to map units
+                // with applyLatLngToLayer
+                var toLine = d3.svg.line()
+                    .interpolate("linear")
+                    .x(function(d) {
+                        return applyLatLngToLayer(d).x
+                    })
+                    .y(function(d) {
+                        return applyLatLngToLayer(d).y
+                    });
+
+
+                // From now on we are essentially appending our features to the
+                // group element. We're adding a class with the line name
+                // and we're making them invisible
+
+                // these are the points that make up the path
+                // they are unnecessary so I've make them
+                // transparent for now
+                if(!set){
+                    var ptFeatures = g.selectAll("circle")
+                        .data(featuresdata)
+                        .enter()
+                        .append("circle")
+                        .attr("r", 3)
+                        .attr("class", "waypoints");
+                }
+                else{
+                    var ptFeatures = g.selectAll("circle");
+                }
+
+                // Here we will make the points into a single
+                // line/path. Note that we surround the featuresdata
+                // with [] to tell d3 to treat all the points as a
+                // single line. For now these are basically points
+                // but below we set the "d" attribute using the 
+                // line creator function from above.
+                var injured_counter = 0;
+                var linePaths = [];
+                var markers=[];
+                for (var i = 0; i < runners/5; i++) {
+                    var linePath = g.selectAll(".lineConnect"+String(i))
+                    .data([featuresdata])
+                    .enter()
+                    .append("path")
+                    .attr("class", "lineConnect"+String(i))
+                    .attr("visibility","hidden");
+                    linePaths.push(linePath);
+                    var marker = g.append("circle")
+                    .attr("r", function(){
+                        if(injured_counter<heridos){
+                            return 6;
+
+                        }
+                        else{
+                            return 2;
+                        }
+                    })
+                    .attr("id", "marker"+String(i))
+                    .attr("class", function(){
+                        if(injured_counter<heridos){
+                            injured_counter++;
+                            return "travelMarkerInjured";
+
+                        }
+                        else{
+                            return "travelMarker";
+                        }
+                    })
+                    .attr('stroke','black')
+                    .attr('stroke-width','1');
+                    markers.push(marker);
+                };
+                // This will be our traveling circle it will
+                // travel along our path
+
+                
+
+
+
+                // For simplicity I hard-coded this! I'm taking
+                // the first and the last object (the origin)
+                // and destination and adding them separately to
+                // better style them. There is probably a better
+                // way to do this!
+                var originANDdestination = [featuresdata[0], featuresdata[39]]
+
+                var begend = g.selectAll(".drinks")
+                    .data(originANDdestination)
+                    .enter()
+                    .append("circle", ".drinks")
+                    .attr("r", 7)
+                    .style("fill", "lightgrey")
+                    .style("opacity", "1");
+
+                // I want names for my coffee and beer
+              /*  var text = g.selectAll("text")
+                    .data(originANDdestination)
+                    .enter()
+                    .append("text")
+                    .text(function(d) {
+                        return d.properties.name
+                    })
+                    .attr("class", "locnames")
+                    .attr("y", function(d) {
+                        return -10
+                    });*/
+
+
+                // when the user zooms in or out you need to reset
+                // the view
+                map.on("viewreset", reset);
+                
+                reset();
+                // this puts stuff on the map! 
+                setTimeout(function(){
+                    console.log(markers.length);
+                    console.log(markers);
+                    for (var po = 0; po < linePaths.length; po++) {
+                        if(markers[po].attr("class")=="travelMarkerInjured"){
+                            transition(po,linePaths[po]);
+                        }
+                        else{
+                            transition(po,linePaths[po]);
+                        }
+                        
+                    };
+                    $('.tooltip').animate({opacity:0.95,top:"5%"},320);
+                },1000);
+                function stop_counters(name,j){
+                        for (var i = 0; i < markers_on_map.length; i++) {
+                            map.removeLayer(markers_on_map[i]);
+                        };
+                        d3.select('.tooltip').select(name).transition().duration(0);
+                    }
+                function stop_circles () {
+                    for (var i = 0; i < linePaths.length; i++) {
+                        linePaths[i].transition().duration(0);
+                        linePaths[i].remove();
+                    };
+                    svg.select("g").selectAll('.travelMarker').remove();
+                    svg.select("g").selectAll('.travelMarkerInjured').remove();
+                    svg.select("g").remove();
+                }
+                // Reposition the SVG to cover the features.
+                function reset() {
+
+                    var bounds = d3path.bounds(collection),
+                        topLeft = bounds[0],
+                        bottomRight = bounds[1];
+
+                    
+                    start_val = 0;
+                    end_val = [runners,tiempo,heridos];
+                    //console.log(d3.select('.tooltip').select('.runners_div'));
+
+                    add_counters(runners,'.runners_div',0);
+                    add_counters(tiempo,'.time_div',1);
+                    add_counters(heridos,'.injures_div',2);
+                    function add_counters(counter,name,j){
+                        d3.select('.tooltip').select(name)
+                            .data([counter])
+                            .text(start_val)
+                            .attr("class", "txt "+name.substring(1,name.length))
+                            .attr("x", 10)
+                            .attr("y", function(d, i) {
+                                return 50 + i * 30
+                            })
+                            .transition()
+                            .duration(5500)
+                                .tween("text", function(d) {
+                                    blocked = true;
+                                    var z = d3.interpolate(this.textContent, d),
+                                        prec = (d + "").split("."),
+                                        round = (prec.length > 1) ? Math.pow(10, prec[1].length) : 1;
+
+                                    return function(t) {
+                                        if(j==1){
+                                            secs = Math.round(z(t) * round) / round;
+                                            min = Math.floor(secs/60);
+                                            sec = (secs/60 - min)*60;
+                                            sec = Math.floor(sec);
+                                            if(sec<10){
+                                                sec= "0"+sec;
+                                            }
+                                            if(min<10){
+                                                min= "0"+min;
+                                            }
+                                            text = min+":"+sec+" min ";
+                                        }
+                                        else if(j==0){
+                                            text = Math.round(z(t) * round) / round;
+                                            text = text+" corredores ";
+                                        }
+                                        else{
+                                            text = Math.round(z(t) * round) / round;
+                                            text = text+" heridos ";
+                                        }
+                                        this.textContent = text;
+                                    };
+                                });
+                    }
+                    
+                    // here you're setting some styles, width, heigh etc
+                    // to the SVG. Note that we're adding a little height and
+                    // width because otherwise the bounding box would perfectly
+                    // cover our features BUT... since you might be using a big
+                    // circle to represent a 1 dimensional point, the circle
+                    // might get cut off.
+                    //console.log(set);
+                    if(!set){
+                        set = true;
+                    }
+
+                    // for the points we need to convert from latlong
+                    // to map units
+                    begend.attr("transform",
+                        function(d) {
+                            return "translate(" +
+                                applyLatLngToLayer(d).x + "," +
+                                applyLatLngToLayer(d).y + ")";
+                        });
+
+                    ptFeatures.attr("transform",
+                        function(d) {
+                            return "translate(" +
+                                applyLatLngToLayer(d).x + "," +
+                                applyLatLngToLayer(d).y + ")";
+                        });
+
+                    // again, not best practice, but I'm harding coding
+                    // the starting point
+                    for (var i = 0; i < markers.length; i++) {
+                        markers[i].attr("transform",
+                        function() {
+                            var y = featuresdata[0].geometry.coordinates[1];
+                            var x = featuresdata[0].geometry.coordinates[0];
+                            return "translate(" +
+                                map.latLngToLayerPoint(new L.LatLng(y, x)).x + "," +
+                                map.latLngToLayerPoint(new L.LatLng(y, x)).y + ")";
+                        });
+                    };
+                   
+                    // Setting the size and location of the overall SVG container
+                    svg.attr("width", bottomRight[0] - topLeft[0] + 150)
+                        .attr("height", bottomRight[1] - topLeft[1] + 150)
+                        .style("left", topLeft[0] - 50 + "px")
+                        .style("top", topLeft[1] - 50 + "px");
+
+
+                    // linePath.attr("d", d3path);
+                    for (var i = 0; i < linePaths.length; i++) {
+                        linePaths[i].attr("d",toLine);
+                    };
+                    // ptPath.attr("d", d3path);
+                    g.attr("transform", "translate(" + (-topLeft[0] + 50) + "," + (-topLeft[1] + 50) + ")");
+
+                } // end reset
+
+                // the transition function could have been done above using
+                // chaining but it's cleaner to have a separate function.
+                // the transition. Dash array expects "500, 30" where 
+                // 500 is the length of the "dash" 30 is the length of the
+                // gap. So if you had a line that is 500 long and you used
+                // "500, 0" you would have a solid line. If you had "500,500"
+                // you would have a 500px line followed by a 500px gap. This
+                // can be manipulated by starting with a complete gap "0,500"
+                // then a small line "1,500" then bigger line "2,500" and so 
+                // on. The values themselves ("0,500", "1,500" etc) are being
+                // fed to the attrTween operator
+                function transition(i,lp,ms) {
+
+                    lp.transition()
+                        .duration(function(){
+                            var temp = Math.random()+0.45;
+                            return temp*10000;
+                        })
+                        .attrTween("stroke-dasharray", tweenDash(i,ms,lp)).remove().each("end", function(){
+                            
+                        });
+                        setTimeout(function(){
+                            animation_ended = true;
+                        },15000);
+                        /*.each("end", function() {
+                            d3.select(this).call(transition);// infinite loop
+                        }); */
+                } //end transition
+
+                // this function feeds the attrTween operator above with the 
+                // stroke and dash lengths
+                function tweenDash(i,markers,lp) {
+                    
+                    return function(){
+                        return function(t) {
+                            //total length of path (single value)
+                            var l = linePath.node().getTotalLength(); 
+                            //console.log(lp);
+                            // this is creating a function called interpolate which takes
+                            // as input a single value 0-1. The function will interpolate
+                            // between the numbers embedded in a string. An example might
+                            // be interpolatString("0,500", "500,500") in which case
+                            // the first number would interpolate through 0-500 and the
+                            // second number through 500-500 (always 500). So, then
+                            // if you used interpolate(0.5) you would get "250, 500"
+                            // when input into the attrTween above this means give me
+                            // a line of length 250 followed by a gap of 500. Since the
+                            // total line length, though is only 500 to begin with this
+                            // essentially says give me a line of 250px followed by a gap
+                            // of 250px.
+                            interpolate = d3.interpolateString("0," + l, l + "," + l);
+                            //t is fraction of time 0-1 since transition began
+
+                            var marker = d3.select("#marker"+String(i));
+                            // p is the point on the line (coordinates) at a given length
+                            // along the line. In this case if l=50 and we're midway through
+                            // the time then this would 25.
+                            var p = linePath.node().getPointAtLength(t * l);
+                            coordinates = map.layerPointToLatLng(L.point(p.x, p.y));
+                            if(marker.attr("class")=="travelMarkerInjured"){   
+                                if (counterheridostotal<heridosdeldia.length){
+                                    if(coordinates.lat-heridosdeldia[counterheridostotal].lat<0){
+                                        console.log("MUERE");
+                                        lp.transition().duration(0);
+                                        marker.transition()
+                                            .duration(800)
+                                            .attr("stroke-width", 2)
+                                            .attr("r", 20)
+                                            .transition()
+                                            .duration(800)
+                                            .attr('stroke-width', 0.5)
+                                            .attr("r", 10)
+                                            .ease('sine');
+                                        var content = '<h2>A ferry ride!<\/h2>' +
+                                            '<p>From: ' +'<br \/>' +
+                                            'to: '  + '<\/p>';
+                                        dapoint = map.latLngToLayerPoint(new L.LatLng(heridosdeldia[counterheridostotal].lat, heridosdeldia[counterheridostotal].lon));
+                                        console.log(dapoint);
+                                       /* setTimeout(function(){
+                                            marker.attr("cx", dapoint.x);// + "," + (dapoint.y) + ")"); 
+                                        marker.attr("cy", dapoint.y);   
+                                        },1000);*/
+                                        
+                                        var mark = L.mapbox.featureLayer({
+                                                type: 'Feature',
+                                                geometry: {
+                                                    type: 'Point',
+                                                    coordinates: [
+                                                      heridosdeldia[counterheridostotal].lon,
+                                                      heridosdeldia[counterheridostotal].lat
+                                                      
+                                                    ]
+                                                },
+                                                properties: {
+                                                    title: 'Herido en '+heridosdeldia[counterheridostotal].zona+'.',
+                                                    description: '<b>Tipo de herida: </b>'+heridosdeldia[counterheridostotal].herida+' <br><b>Pronóstico: </b>'+heridosdeldia[counterheridostotal].pronostico,
+                                                    'marker-size': 'large',
+                                                    'marker-color': '#BE9A6B',
+                                                    'marker-symbol': 'cafe',
+                                                    'opacity':0
+                                                }
+                                            }).addTo(map);
+                                        markers_on_map.push(mark);
+                                        $('.leaflet-marker-icon').css({'opacity':0});
+                                        mark.on('mouseover',function(){
+                                            this.openPopup();
+                                            $('selector').css( 'cursor', 'pointer');
+                                            marker.transition()
+                                                .attr("r",15)
+                                                .attr("stroke-width", 2);
+                                        });
+                                        mark.on('mouseout',function(e){
+                                            e.layer.closePopup();
+                                            marker.transition()
+                                                .attr("r",10)
+                                                .attr("stroke-width", 0.5);
+                                        });  
+                                        counterheridostotal++;
+                                    }
+                                }
+                            }
+                            //Move the marker to that point
+                            if(marker.attr("class")=="travelMarkerInjured"){
+                                if(i%2==0){
+                                    marker.attr("transform", "translate(" + (p.x+Math.random()) + "," + (p.y-Math.random()) + ")"); 
+                                }
+                                else{
+                                    marker.attr("transform", "translate(" + (p.x-Math.random()) + "," + (p.y+Math.random()) + ")"); //move marker
+                                }
+                            }
+                            else{
+                                if(i%2==0){
+                                    marker.attr("transform", "translate(" + (p.x+Math.random()*runners/500) + "," + (p.y-Math.random()*runners/2000) + ")"); 
+                                }
+                                else{
+                                    marker.attr("transform", "translate(" + (p.x-Math.random()*runners/2000) + "," + (p.y+Math.random()*runners/500) + ")"); //move marker
+                                }
+                            }
+                            return interpolate(t);
+                        }
+                    }
+                } //end tweenDash
+
+                // Use Leaflet to implement a D3 geometric transformation.
+                // the latLngToLayerPoint is a Leaflet conversion method:
+                //Returns the map layer point that corresponds to the given geographical
+                // coordinates (useful for placing overlays on the map).
+                function projectPoint(x, y) {
+                    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+                    this.stream.point(point.x, point.y);
+                } //end projectPoint
+
+                $( document ).ready(function() {
+                    /*$('.disactived').on('mouseover',function(){
+                        $(this).animate({opacity: 1,left:"-4%", width:"104%"},100);
+                        $(this).css({'background-color':'#F25818'},100);
+                    });
+                    $('.disactived').on('mouseout',function(){
+                        $(this).animate({opacity: 0.2,left:"0%", width:"100%"},100);
+                        $(this).css({'background-color':'#CA3C3C'},100);
+                    });
+                    $('.actived').on('mouseover',function(){
+                        $(this).animate({left:"-4%", width:"104%"},100);
+                        $(this).css({'background-color':'#F25818'},100);
+                    });
+                    $('.actived').on('mouseout',function(){
+                        $(this).css({'background-color':'#BF0000'},100);
+                    });
+                    $('.disactived_day').on('mouseover',function(){
+                        $(this).animate({opacity: 1,left:"0%", width:"100%"},100);
+                        $(this).css({'background-color':'#CA7B7C'},100);
+                    });
+                    $('.disactived_day').on('mouseout',function(){
+                        $(this).animate({opacity: 0.2,left:"4%", width:"96%"},100);
+                        $(this).css({'background-color':'#C8C7CA'},100);
+                    });*/
+                    $('.years').click(function(){
+                        if(animation_ended){
+                        if($(this)[0]!=$('.actived')[0]){
+                            $('.actived').animate({opacity: 0.2,left:"0%", width:"100%"},100);
+                            $('.actived').parent().children().last().slideUp();
+                            $('.actived').toggleClass("disactived");
+                            $('.actived').toggleClass("actived");
+                            $(this).toggleClass("disactived");
+                            $(this).toggleClass("actived");
+                            $(this).parent().children().last().slideDown();
+                            $(this).animate({opacity: 1,left:"-4%", width:"104%"},100);
+                        }}
+                    });
+                    $('.days').click(function(){
+                        console.log(animation_ended);
+                        if(animation_ended){
+                        if($(this)[0]!=$('.actived_day')[0]){
+                            $('.actived_day').animate({opacity: 0.2,left:"4%", width:"96%"},100);
+                            $('.actived_day').toggleClass("disactived_day");
+                            $('.actived_day').toggleClass("actived_day");
+                            $(this).toggleClass("disactived_day");
+                            $(this).toggleClass("actived_day");
+                            $(this).animate({opacity: 1,left:"0%", width:"100%"},100);
+                            stop_counters('.runners_div',0);
+                            stop_counters('.time_div',1);
+                            stop_counters('.injures_div',0);
+                            stop_circles();
+                            id = $(this).parent().attr('id');
+                            day = $(this).attr('day');
+                            if(id=='en2014'){
+                                useful_data = final_data[3];
+                                finher = final_heridas[3].values;
+                            }
+                            else if(id == 'en2013'){
+                                useful_data = final_data[2];
+                                finher = final_heridas[2].values;
+                            }
+                            else if(id=='en2012'){
+                                useful_data = final_data[1];
+                                finher = final_heridas[1].values;
+                            }
+                            else if(id=='en2011'){
+                                useful_data = final_data[0];
+                                finher = final_heridas[0].values;
+                            }
+                            animation_ended = false;
+                            init_all(useful_data,day,finher);
+                        }}
+                    });
+                });
+            });
+
+
+            // similar to projectPoint this function converts lat/long to
+            // svg coordinates except that it accepts a point from our 
+            // GeoJSON
+
+            function applyLatLngToLayer(d) {
+                var y = d.geometry.coordinates[1]
+                var x = d.geometry.coordinates[0]
+                return map.latLngToLayerPoint(new L.LatLng(y, x))
+
+
+            }
+
+        
+        }
+    },1050);
+    </script>
+</body>
+
+</html>

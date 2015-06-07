@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src='http://api.tiles.mapbox.com/mapbox.js/v0.6.6/mapbox.js'></script>
+  <link href='http://api.tiles.mapbox.com/mapbox.js/v0.6.6/mapbox.css' rel='stylesheet' />
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+    #marker {
+        position:absolute;
+        margin-top:-25px;
+        margin-left:-25px;
+        width:50px;
+        height:50px;
+        display:none;
+        pointer-events:all;
+    }
+  </style>
+</head>
+<body>
+<div id='map'></div>
+<svg id='marker' xmlns="http://www.w3.org/2000/svg" version="1.1">
+<circle cx="25" cy="25" r="25" style="fill:#FFF" />
+</svg>
+<script>
+  var map = mapbox.map('map');
+  map.addLayer(mapbox.layer().id('examples.map-20v6611k'));
+
+  var markerLayer = mapbox.markers.layer();
+
+  markerLayer.factory(function(f) {
+      var m = document.getElementById('marker').cloneNode(true);
+      m.style.display = 'block';
+      return m;
+  });
+  map.addLayer(markerLayer);
+
+  map.zoom(5).center({ lat: 37, lon: -77 });
+
+  markerLayer.add_feature({
+      geometry: {
+          coordinates: [-77, 37.9]
+      },
+      properties: {
+          'marker-color': '#000',
+          'marker-symbol': 'star-stroked',
+          title: 'Example Marker',
+          description: 'This is a single marker.'
+      }
+  });
+</script>
+</body>
+</html>
